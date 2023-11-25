@@ -1,0 +1,6 @@
+*.egg-info
+.coverage
+.tox
+.vscode
+*.pyc
+htmlcov

@@ -1,0 +1,6 @@
+-   id: sri-checker
+    name: sri-checker
+    description: Check SRI-hashes in HTML files
+    entry: sri-checker
+    language: python
+    types: [html]
