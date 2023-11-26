@@ -2,14 +2,20 @@ from __future__ import annotations
 
 import argparse
 import base64
+import functools
 import hashlib
 import sys
 import urllib.request
 from collections.abc import Sequence
+from typing import Callable
+from typing import TYPE_CHECKING
 
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 from bs4.element import Tag
+
+if TYPE_CHECKING:
+    from hashlib import _Hash
 
 HASHING_ALGOS = {
     'sha256': hashlib.sha256,
@@ -36,14 +42,9 @@ def _find_tags(src: str) -> list[ResultSet[Tag]]:
     return links
 
 
-def _check_integrity(filename: str, t: Tag) -> bool:
-    path = t.get('src') or t.get('href')
-    assert path is not None
-    algo, hash_in_file = t['integrity'].split('-')
-    hash_algo = HASHING_ALGOS.get(algo)
-    if hash_algo is None:
-        raise ValueError(f'unknown hashing algorithm: {algo!r}')
-
+@functools.cache
+def _open_resource(path: str, hash_algo: Callable[[str], _Hash]) -> str:
+    """this function is split out so that we can cache the result"""
     # remote
     if path.startswith('http'):
         ret = urllib.request.urlopen(path, timeout=3)
@@ -52,8 +53,18 @@ def _check_integrity(filename: str, t: Tag) -> bool:
     else:
         with open(path, 'rb') as f:
             contents = f.read()
+    return base64.b64encode(hash_algo(contents).digest()).decode()
 
-    current_hash = base64.b64encode(hash_algo(contents).digest()).decode()
+
+def _check_integrity(filename: str, t: Tag) -> bool:
+    path = t.get('src') or t.get('href')
+    assert path is not None
+    algo, hash_in_file = t['integrity'].split('-')
+    hash_algo = HASHING_ALGOS.get(algo)
+    if hash_algo is None:
+        raise ValueError(f'unknown hashing algorithm: {algo!r}')
+
+    current_hash = _open_resource(path=path, hash_algo=hash_algo)
     if current_hash != hash_in_file:
         print(
             f'{filename}:{t.sourceline} SRI-hash incorrect\n'

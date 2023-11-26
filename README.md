@@ -61,7 +61,7 @@ sri-checker base.html
 This will return an error end exit with `1`.
 
 ```console
-t.html:1 SRI-hash incorrect
+base.html:1 SRI-hash incorrect
 expected: sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN
 got: sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL
 
@@ -70,5 +70,5 @@ got: sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL
 Contents can also be passed via stdin:
 
 ```bash
-cat t.html | sri-checker -
+cat base.html | sri-checker -
 ```
