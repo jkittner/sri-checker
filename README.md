@@ -29,7 +29,7 @@ Sample `.pre-commit-config.yaml`:
 
 ```yaml
 - repo: https://github.com/jkittner/sri-checker
-  rev: 0.1.0
+  rev: 0.1.1
   hooks:
     - id: sri-checker
 ```
